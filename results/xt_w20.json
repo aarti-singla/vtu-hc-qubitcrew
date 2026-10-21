@@ -1,0 +1,108 @@
+{
+ "backend": "ibm_fez",
+ "date": "2026-10-21 19:47",
+ "n": 4,
+ "layout": [
+  127,
+  137,
+  147,
+  146
+ ],
+ "shots": 2000,
+ "wait_ns": 20000.0,
+ "tau_ns": 600.0,
+ "max_pulses": 16,
+ "repeats": 2,
+ "pulses": {
+  "uniform": 64,
+  "staggered": 60
+ },
+ "rows": [
+  {
+   "config": "baseline",
+   "repeat": 1,
+   "x_mean": -0.0025000000000000022,
+   "stderr": 0.010917880975720518,
+   "job_id": "dbcchoni0auc73dulpo0"
+  },
+  {
+   "config": "IBM Runtime DD",
+   "repeat": 1,
+   "x_mean": 0.5407500000000001,
+   "stderr": 0.009245355252774227,
+   "job_id": "dbccht1gv2cc73ea2el0"
+  },
+  {
+   "config": "our DD uniform",
+   "repeat": 1,
+   "x_mean": 0.665,
+   "stderr": 0.008292244117245946,
+   "job_id": "dbcci9s24mrc73cjbh5g"
+  },
+  {
+   "config": "our DD staggered",
+   "repeat": 1,
+   "x_mean": 0.80375,
+   "stderr": 0.006641204239443326,
+   "job_id": "dbcciivi0auc73dulrbg"
+  },
+  {
+   "config": "our DD staggered",
+   "repeat": 2,
+   "x_mean": 0.79825,
+   "stderr": 0.006725425172433339,
+   "job_id": "dbccimc24mrc73cjbi1g"
+  },
+  {
+   "config": "our DD uniform",
+   "repeat": 2,
+   "x_mean": 0.6667500000000001,
+   "stderr": 0.008290041088559212,
+   "job_id": "dbcciogc77vs73860ad0"
+  },
+  {
+   "config": "IBM Runtime DD",
+   "repeat": 2,
+   "x_mean": 0.5467500000000001,
+   "stderr": 0.009248738089599034,
+   "job_id": "dbccirpgv2cc73ea2gqg"
+  },
+  {
+   "config": "baseline",
+   "repeat": 2,
+   "x_mean": 0.06049999999999999,
+   "stderr": 0.010982983997985247,
+   "job_id": "dbcciu1gv2cc73ea2gvg"
+  }
+ ],
+ "summary": [
+  {
+   "config": "baseline",
+   "x_mean": 0.028999999999999995,
+   "stderr": 0.007743159279325203,
+   "repeat_spread": 0.044547727214752496,
+   "runs": 2
+  },
+  {
+   "config": "IBM Runtime DD",
+   "x_mean": 0.5437500000000001,
+   "stderr": 0.006538649516528623,
+   "repeat_spread": 0.004242640687119289,
+   "runs": 2
+  },
+  {
+   "config": "our DD uniform",
+   "x_mean": 0.665875,
+   "stderr": 0.005862723210036442,
+   "repeat_spread": 0.001237436867076479,
+   "runs": 2
+  },
+  {
+   "config": "our DD staggered",
+   "x_mean": 0.8009999999999999,
+   "stderr": 0.0047259109571594765,
+   "repeat_spread": 0.0038890872965259755,
+   "runs": 2
+  }
+ ]
+}

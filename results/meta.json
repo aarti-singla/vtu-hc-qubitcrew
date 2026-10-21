@@ -1,0 +1,19 @@
+{
+ "timestamp": "2026-10-21 17:30:31",
+ "python": "3.14.6",
+ "K": 32,
+ "quick": false,
+ "noise_defaults": {
+  "t1_us": 120.0,
+  "t2_us": 100.0,
+  "sigma_f_khz": 25.0,
+  "zz_khz": 70.0,
+  "zz_spread": 0.25,
+  "p1q": 0.0003,
+  "p2q": 0.007,
+  "pulse_overrot": 0.004,
+  "p_readout": 0.015,
+  "spread": 0.15
+ },
+ "seconds": 25.73646593093872
+}

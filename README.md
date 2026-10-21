@@ -46,68 +46,48 @@
 
 | # | Name | GitHub Username | Role |
 | :-- | :--- | :--- | :--- |
-| 1 | _Add your name_ | _your-github-username_ | _Team Lead_ |
-| 2 | _Add your name_ | _your-github-username_ | _Developer_ |
-| 3 | _Add your name_ | _your-github-username_ | _Developer_ |
-
-<!--
-Optional: add a plain list instead of the table above.
-- @username1
-- @username2
--->
+| 1 | Prisha Bharti | _your-github-username_ | Team Lead |
+| 2 | Aarti Singla | _your-github-username_ | Developer |
+| 3 | Angel Garg | _your-github-username_ | Developer |
 
 ---
 
 ## ❓ Problem Statement
 
-<!--
-State the problem you are solving. Be specific: what is broken or missing,
-who experiences it, and why does it matter. Link to the official problem
-statement from the brief if one applies.
--->
+**Problem:** On NISQ devices, qubits that sit idle while their neighbours run gates dephase and pick up ZZ crosstalk, and gate errors keep accumulating. Dynamical decoupling (DD) and error mitigation (ZNE, readout mitigation) each help, but they are usually applied separately, without knowing what the neighbouring qubits are doing, and without checking that they work together.
 
-**Problem:** _Describe the problem in 2–3 sentences._
+**Why it matters:** Idle time is a large fraction of real circuits. A DD pass that ignores context either wastes pulses (imperfect pulses cost fidelity) or leaves crosstalk untouched, and stacking mitigation on top without a plan can add variance without adding accuracy.
 
-**Why it matters:** _Explain the impact or opportunity._
-
-**Track / Category:** _Online / Offline · Track 1 / Track 2 · <domain>_
+**Track / Category:** Online · Integrated Dynamical Decoupling and Error Mitigation Pipeline for NISQ Workflows
 
 ---
 
 ## 💡 Proposed Solution
 
-<!--
-Describe your solution. Keep it concrete: the core idea, the user flow, and
-the quantum/ML technique you are applying.
--->
+**Solution:** An automated Qiskit pipeline that compiles and ALAP-schedules a circuit with real device durations, finds every idle window, classifies it (*idle-idle* vs *crosstalk-idle*), injects crosstalk-aware DD, selects the DD strategy and pulse spacing automatically, then layers ZNE and readout mitigation on top. Everything is benchmarked against Qiskit's own `PadDynamicalDecoupling`, on a physical noise model and on real IBM Heron hardware. A Streamlit dashboard shows the schedule before/after DD, a live benchmark and all results.
 
-**Solution:** _In 2–3 sentences, describe what you built._
+**Key idea:** Identical DD trains on coupled neighbours leave ZZ crosstalk intact (the two sign flips cancel in the product), while **staggered** trains refocus it. The injector picks pulse placement per window by minimising a ZZ-frame cost, and "no DD" is always a candidate, so auto-DD cannot hurt on the device model.
 
-**Key idea:** _The one-line technical summary of your approach._
-
-**Why this works:** _How your approach addresses the problem statement._
+**Why this works:** It is schedule-aware: pulses go only where a window is long enough to pay for them and where a neighbour's timing makes staggering useful. Results (simulated noisy device, 6 workloads): auto-DD cuts infidelity `|1-F|` by about 42 % on average (Qiskit's DD: about 38 %), with larger gains on circuits with long synchronous idle periods (GHZ-wait 0.838 → 0.871). On IBM hardware (ibm_marrakesh, ibm_fez, ibm_kingston), staggered DD beat uniform DD and IBM's built-in Runtime DD in the crosstalk test; the gap is small on marrakesh and large on fez and kingston. Caveats: ZNE numbers above 1 are not physical, hardware baselines drift between sessions, and we compare configurations only within one run.
 
 ---
 
 ## 🧩 Approach & Architecture
 
-<!--
-Walk through how it works. A simple pipeline diagram in text or Mermaid is ideal.
--->
-
 ```mermaid
 flowchart LR
-    A[Input Data] --> B[Preprocessing]
-    B --> C[Quantum Circuit / Model]
-    C --> D[Post-processing]
-    D --> E[Output]
+    A[Circuit] --> B[Transpile + ALAP schedule]
+    B --> C[Idle-window analyzer]
+    C --> D[DD injector: uniform / staggered / auto]
+    D --> E[ZNE + readout mitigation]
+    E --> F[Benchmark vs Qiskit DD]
 ```
 
-1. **Input** — _what data goes in and in what format_
-2. **Preprocessing** — _cleaning, feature extraction, encoding_
-3. **Quantum core** — _the circuit, ansatz, or algorithm used_
-4. **Post-processing** — _decoding, measurement, scoring_
-5. **Output** — _what the user finally gets_
+1. **Input** — a Qiskit circuit (GHZ, QAOA, VQE-TFIM, mirror circuits) and a device `Target` with real gate durations
+2. **Preprocessing** — transpile to the device basis, optional CX folding for ZNE, ALAP scheduling with explicit delays
+3. **Quantum core** — idle-window analyzer (idle-idle vs crosstalk-idle) and the DD injector (XY4 / XY8 / XpXm / CPMG; uniform, staggered or auto-selected spacing)
+4. **Post-processing** — ZNE extrapolation (linear / Richardson / exponential) and readout-error mitigation
+5. **Output** — state fidelity / energy error per configuration, schedule timelines, and the Streamlit dashboard
 
 ---
 
@@ -116,10 +96,11 @@ flowchart LR
 | Layer | Technology |
 | :--- | :--- |
 | Language | Python 3.11+ |
-| Quantum SDK | Qiskit `>=1.0`, Qiskit Aer, Qiskit Runtime |
-| Optimisation | Qiskit Optimization / COBYLA / SPSA |
-| Simulation | AerSimulator (statevector / noisemodel) |
-| Environment | JupyterLab / VS Code, `venv` |
+| Quantum SDK | Qiskit `>=2.1`, Qiskit Aer, Qiskit IBM Runtime (EstimatorV2) |
+| Optimisation | Cost-function search over DD candidates (CPMG / Uhrig, even pulse counts) |
+| Simulation | Exact timeline density-matrix simulator; AerSimulator for offline hardware dry runs |
+| Dashboard | Streamlit, Plotly |
+| Environment | VS Code, `venv` |
 | Version control | Git + GitHub |
 
 ---
@@ -130,19 +111,23 @@ flowchart LR
 vtu-hc-qubitcrew/
 ├── README.md              # This file
 ├── requirements.txt       # Python dependencies
-├── pyproject.toml         # Project metadata (optional)
 ├── .gitignore
-├── notebooks/             # Jupyter notebooks for experiments
-│   └── exploration.ipynb
-├── src/
-│   ├── __init__.py
-│   ├── circuit.py         # Quantum circuit construction
-│   ├── optimizer.py       # Optimization loop
-│   └── main.py            # Entry point
-├── data/                  # Datasets (use Git LFS for large files)
-├── tests/                 # Unit tests
-│   └── test_circuit.py
-└── docs/                  # Notes, diagrams, reports
+├── ddpipe/
+│   ├── device.py          # synthetic IBM-like device: Qiskit Target + noise parameters
+│   ├── program.py         # timed-event program <-> Qiskit scheduled circuit
+│   ├── idle.py            # idle-window analyzer
+│   ├── dd.py              # DD sequences + uniform / staggered injector
+│   ├── simulate.py        # exact timeline density-matrix simulator
+│   ├── mitigation.py      # CX folding + extrapolators
+│   ├── workloads.py       # GHZ / QAOA / VQE-TFIM / mirror workloads
+│   ├── pipeline.py        # Compiled / Config / evaluate / auto-DD selection
+│   └── experiments.py     # reproduces every table and plot
+├── app/app.py             # Streamlit dashboard
+├── scripts/               # real-hardware runs (run_hardware, run_crosstalk_hw, run_spectator_hw)
+├── results/               # CSV, JSON, PNG (committed so the dashboard works offline)
+├── tests/                 # pytest suite
+│   └── test_ddpipe.py
+└── docs/                  # longer notes (README_long.md)
 ```
 
 ---
@@ -180,19 +165,23 @@ pip install -r requirements.txt
 ### 4. Run
 
 ```bash
-python -m src.main
+python -m ddpipe.experiments --quick     # ~30 s; drop --quick for the full run
+python -m ddpipe.report                  # figures into results/
+python -m streamlit run app/app.py       # dashboard at http://localhost:8501
 ```
 
-Or launch the notebook workflow:
+Real hardware (save credentials once with `QiskitRuntimeService.save_account(...)`; never commit a token):
 
 ```bash
-jupyter lab
+python scripts/run_hardware.py --fake --n 4                                   # free offline dry run
+python scripts/run_crosstalk_hw.py --backend ibm_fez --n 4 --wait-ns 10000 --extended
+python scripts/run_spectator_hw.py --backend ibm_fez --pairs 150
 ```
 
 ### 5. Run the tests
 
 ```bash
-pytest -q
+python -m pytest -q
 ```
 
 ---
@@ -293,6 +282,8 @@ git pull --rebase       # update your branch on top of main
 | 💻 IBM Quantum Platform | https://quantum.cloud.ibm.com/ |
 | 🎓 Qiskit textbook | https://qiskit.qotlabs.org/learning/ |
 | 📋 GitHub Docs | https://docs.github.com/ |
+| 📑 Ezzell et al., DD performance survey | https://arxiv.org/abs/2207.03670 |
+| 📑 Tripathi et al., crosstalk suppression with DD | https://doi.org/10.1103/PhysRevApplied.18.024068 |
 
 ---
 

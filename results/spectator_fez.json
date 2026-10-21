@@ -1,0 +1,114 @@
+{
+ "backend": "ibm_fez",
+ "date": "2026-10-21 20:59",
+ "layout": [
+  142,
+  143,
+  144,
+  145,
+  146,
+  147
+ ],
+ "pairs": 150,
+ "circuit_us": 20.424,
+ "shots": 2000,
+ "tau_ns": 600.0,
+ "max_pulses": 16,
+ "repeats": 1,
+ "window_kinds": {
+  "idle-idle": 4
+ },
+ "pulses": {
+  "uniform": 64,
+  "staggered": 60
+ },
+ "rows": [
+  {
+   "config": "baseline",
+   "repeat": 1,
+   "spectator_x": -0.43800000000000006,
+   "spectator_stderr": 0.009364183760478005,
+   "active_x": -0.458,
+   "active_stderr": 0.01368787784866595,
+   "job_id": "dbcdegs24mrc73cjdk30"
+  },
+  {
+   "config": "IBM Runtime DD",
+   "repeat": 1,
+   "spectator_x": 0.6585000000000001,
+   "spectator_stderr": 0.008090175368927425,
+   "active_x": -0.39999999999999997,
+   "active_stderr": 0.0137094037069451,
+   "job_id": "dbcdfovi0auc73duo140"
+  },
+  {
+   "config": "Qiskit PadDD (X-X)",
+   "repeat": 1,
+   "spectator_x": 0.63875,
+   "spectator_stderr": 0.007759327048784579,
+   "active_x": -0.40900000000000003,
+   "active_stderr": 0.013752663378415105,
+   "job_id": "dbcdftc24mrc73cjdn4g"
+  },
+  {
+   "config": "our DD uniform",
+   "repeat": 1,
+   "spectator_x": 0.7615000000000001,
+   "spectator_stderr": 0.007238067767021804,
+   "active_x": -0.368,
+   "active_stderr": 0.013994204157436034,
+   "job_id": "dbcdfvfi0auc73duo1jg"
+  },
+  {
+   "config": "our DD staggered",
+   "repeat": 1,
+   "spectator_x": 0.78725,
+   "spectator_stderr": 0.006867971407191501,
+   "active_x": -0.43000000000000005,
+   "active_stderr": 0.01379980978129771,
+   "job_id": "dbcdgdk24mrc73cjdocg"
+  }
+ ],
+ "summary": [
+  {
+   "config": "baseline",
+   "runs": 1,
+   "spectator_x": -0.43800000000000006,
+   "spectator_stderr": 0.009364183760478005,
+   "active_x": -0.458,
+   "active_stderr": 0.01368787784866595
+  },
+  {
+   "config": "IBM Runtime DD",
+   "runs": 1,
+   "spectator_x": 0.6585000000000001,
+   "spectator_stderr": 0.008090175368927425,
+   "active_x": -0.39999999999999997,
+   "active_stderr": 0.0137094037069451
+  },
+  {
+   "config": "Qiskit PadDD (X-X)",
+   "runs": 1,
+   "spectator_x": 0.63875,
+   "spectator_stderr": 0.007759327048784579,
+   "active_x": -0.40900000000000003,
+   "active_stderr": 0.013752663378415105
+  },
+  {
+   "config": "our DD uniform",
+   "runs": 1,
+   "spectator_x": 0.7615000000000001,
+   "spectator_stderr": 0.007238067767021804,
+   "active_x": -0.368,
+   "active_stderr": 0.013994204157436034
+  },
+  {
+   "config": "our DD staggered",
+   "runs": 1,
+   "spectator_x": 0.78725,
+   "spectator_stderr": 0.006867971407191501,
+   "active_x": -0.43000000000000005,
+   "active_stderr": 0.01379980978129771
+  }
+ ]
+}

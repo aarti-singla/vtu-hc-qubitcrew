@@ -1,0 +1,48 @@
+{
+ "backend": "ibm_marrakesh",
+ "date": "2026-10-21 17:55",
+ "n": 4,
+ "shots": 2000,
+ "wait_ns": 10000.0,
+ "strategy": "staggered",
+ "tau_ns": 600.0,
+ "rows": [
+  {
+   "config": "baseline",
+   "fidelity": 0.3845624999999999,
+   "stderr": 0.004880842052415238,
+   "job_id": "dbcarq7i0auc73duicp0"
+  },
+  {
+   "config": "Runtime DD (XY4)",
+   "fidelity": 0.4693749999999999,
+   "stderr": 0.004800039876136446,
+   "job_id": "dbcart9gv2cc73e9v2ug"
+  },
+  {
+   "config": "our DD (idle-aware)",
+   "fidelity": 0.47937499999999994,
+   "stderr": 0.004790842501585707,
+   "job_id": "dbcas0s24mrc73cj82rg"
+  },
+  {
+   "config": "Runtime ZNE (level 2)",
+   "fidelity": 0.8027673242638114,
+   "stderr": 0.03639294868154846,
+   "job_id": "dbcas41gv2cc73e9v38g"
+  },
+  {
+   "config": "our DD + Runtime ZNE",
+   "fidelity": 0.7415597167577991,
+   "stderr": 0.020960588205409265,
+   "job_id": "dbcau79gv2cc73e9v6c0"
+  }
+ ],
+ "job_ids": [
+  "dbcarq7i0auc73duicp0",
+  "dbcart9gv2cc73e9v2ug",
+  "dbcas0s24mrc73cj82rg",
+  "dbcas41gv2cc73e9v38g",
+  "dbcau79gv2cc73e9v6c0"
+ ]
+}
