@@ -46,9 +46,9 @@
 
 | # | Name | GitHub Username | Role |
 | :-- | :--- | :--- | :--- |
-| 1 | Prisha Bharti | _your-github-username_ | Team Lead |
-| 2 | Aarti Singla | _your-github-username_ | Developer |
-| 3 | Angel Garg | _your-github-username_ | Developer |
+| 1 | Prisha Bharti | [@prishabharti](https://github.com/prishabharti) | Team Lead |
+| 2 | Aarti Singla | [@aarti-singla](https://github.com/aarti-singla) | Developer |
+| 3 | Angel Garg | [@angelgarg](https://github.com/angelgarg) | Developer |
 
 ---
 
