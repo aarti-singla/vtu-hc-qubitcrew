@@ -1,0 +1,35 @@
+{
+ "backend": "ibm_marrakesh",
+ "date": "2026-10-21 19:51",
+ "n": 4,
+ "shots": 2000,
+ "wait_ns": 20000.0,
+ "max_pulses": 16,
+ "strategy": "staggered",
+ "tau_ns": 600.0,
+ "rows": [
+  {
+   "config": "baseline",
+   "fidelity": 0.5513124999999999,
+   "stderr": 0.004467747483701936,
+   "job_id": "dbcckjs24mrc73cjbmhg"
+  },
+  {
+   "config": "Runtime DD (XY4)",
+   "fidelity": 0.5672499999999999,
+   "stderr": 0.0044710819964243545,
+   "job_id": "dbcckp9gv2cc73ea2lhg"
+  },
+  {
+   "config": "our DD (idle-aware)",
+   "fidelity": 0.5900624999999999,
+   "stderr": 0.004410228478704361,
+   "job_id": "dbccksk24mrc73cjbn9g"
+  }
+ ],
+ "job_ids": [
+  "dbcckjs24mrc73cjbmhg",
+  "dbcckp9gv2cc73ea2lhg",
+  "dbccksk24mrc73cjbn9g"
+ ]
+}

@@ -1,0 +1,159 @@
+{
+ "backend": "ibm_kingston",
+ "date": "2026-10-21 21:10",
+ "layout": [
+  6,
+  5,
+  4,
+  3,
+  16,
+  23
+ ],
+ "pairs": 150,
+ "circuit_us": 20.432,
+ "shots": 2000,
+ "tau_ns": 600.0,
+ "max_pulses": 16,
+ "repeats": 2,
+ "window_kinds": {
+  "idle-idle": 4
+ },
+ "pulses": {
+  "uniform": 64,
+  "staggered": 60
+ },
+ "rows": [
+  {
+   "config": "baseline",
+   "repeat": 1,
+   "spectator_x": 0.46425,
+   "spectator_stderr": 0.00962631971471964,
+   "active_x": 0.084,
+   "active_stderr": 0.014952825819891035,
+   "job_id": "dbcdllni0auc73duoegg"
+  },
+  {
+   "config": "IBM Runtime DD",
+   "repeat": 1,
+   "spectator_x": 0.81725,
+   "spectator_stderr": 0.006439130861381837,
+   "active_x": 0.134,
+   "active_stderr": 0.013655108934021729,
+   "job_id": "dbcdo70c77vs738631h0"
+  },
+  {
+   "config": "Qiskit PadDD (X-X)",
+   "repeat": 1,
+   "spectator_x": 0.8095,
+   "spectator_stderr": 0.006555999161073771,
+   "active_x": 0.051000000000000004,
+   "active_stderr": 0.015193872120035763,
+   "job_id": "dbcdp1vi0auc73duomig"
+  },
+  {
+   "config": "our DD uniform",
+   "repeat": 1,
+   "spectator_x": 0.8265,
+   "spectator_stderr": 0.006273132192134961,
+   "active_x": 0.0305,
+   "active_stderr": 0.01503756546120415,
+   "job_id": "dbcdpc9gv2cc73ea5bo0"
+  },
+  {
+   "config": "our DD staggered",
+   "repeat": 1,
+   "spectator_x": 0.87,
+   "spectator_stderr": 0.005501584998888957,
+   "active_x": 0.10699999999999998,
+   "active_stderr": 0.015227787101217301,
+   "job_id": "dbcdpl8c77vs738634s0"
+  },
+  {
+   "config": "our DD staggered",
+   "repeat": 2,
+   "spectator_x": 0.8705,
+   "spectator_stderr": 0.005488596131981292,
+   "active_x": -0.008500000000000008,
+   "active_stderr": 0.015286002584063632,
+   "job_id": "dbcdpnoc77vs7386351g"
+  },
+  {
+   "config": "our DD uniform",
+   "repeat": 2,
+   "spectator_x": 0.8247500000000001,
+   "spectator_stderr": 0.006291604028385765,
+   "active_x": 0.0475,
+   "active_stderr": 0.015259730502207436,
+   "job_id": "dbcdppni0auc73duooag"
+  },
+  {
+   "config": "Qiskit PadDD (X-X)",
+   "repeat": 2,
+   "spectator_x": 0.8145,
+   "spectator_stderr": 0.0064807840960797326,
+   "active_x": 0.0795,
+   "active_stderr": 0.015033125922442079,
+   "job_id": "dbcdprk24mrc73cjeecg"
+  },
+  {
+   "config": "IBM Runtime DD",
+   "repeat": 2,
+   "spectator_x": 0.80625,
+   "spectator_stderr": 0.006606438620769892,
+   "active_x": 0.0955,
+   "active_stderr": 0.0147072218654646,
+   "job_id": "dbcdpts24mrc73cjeegg"
+  },
+  {
+   "config": "baseline",
+   "repeat": 2,
+   "spectator_x": 0.451,
+   "spectator_stderr": 0.009658665151044426,
+   "active_x": 0.08049999999999999,
+   "active_stderr": 0.01482344005283524,
+   "job_id": "dbcdpvpgv2cc73ea5d60"
+  }
+ ],
+ "summary": [
+  {
+   "config": "baseline",
+   "runs": 2,
+   "spectator_x": 0.457625,
+   "spectator_stderr": 0.006818281377114032,
+   "active_x": 0.08224999999999999,
+   "active_stderr": 0.010527599144629321
+  },
+  {
+   "config": "IBM Runtime DD",
+   "runs": 2,
+   "spectator_x": 0.81175,
+   "spectator_stderr": 0.004612684616901529,
+   "active_x": 0.11475,
+   "active_stderr": 0.010034495191587866
+  },
+  {
+   "config": "Qiskit PadDD (X-X)",
+   "runs": 2,
+   "spectator_x": 0.812,
+   "spectator_stderr": 0.004609275634522196,
+   "active_x": 0.06525,
+   "active_stderr": 0.010687008760640182
+  },
+  {
+   "config": "our DD uniform",
+   "runs": 2,
+   "spectator_x": 0.825625,
+   "spectator_stderr": 0.004442309893231223,
+   "active_x": 0.039,
+   "active_stderr": 0.010711999696601937
+  },
+  {
+   "config": "our DD staggered",
+   "runs": 2,
+   "spectator_x": 0.87025,
+   "spectator_stderr": 0.0038856185157578197,
+   "active_x": 0.04924999999999999,
+   "active_stderr": 0.010788273436931417
+  }
+ ]
+}
