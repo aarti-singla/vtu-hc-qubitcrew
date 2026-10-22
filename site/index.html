@@ -261,10 +261,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="hw">
     <div class="panel hcard rv"><h3>Idle qubits beside a busy pair <span class="gain" id="hgain"></span></h3>
       <div class="tabs" id="htabs" style="margin:10px 0 6px"></div><div id="hrows"></div>
-      <p class="note">Mean ⟨X⟩ of four idle qubits in a 6-qubit, ~20 µs circuit (ideal = 1). One session per device, so compare bars within a device, not across.</p></div>
+      <p class="note">Mean ⟨X⟩ of four idle qubits in a 6-qubit, ~20 µs circuit (ideal = 1). Mean of 3 interleaved repeats per configuration; ± is shot-noise standard error. Compare bars within a device, not across. On ibm_kingston the margin over IBM Runtime DD is small (+0.02); on ibm_fez it is +0.15.</p></div>
     <div class="panel hcard rv"><h3>Crosstalk test on ibm_fez</h3>
       <div id="xrows"></div>
-      <p class="note">Four coupled qubits start in |+⟩ and wait 20 µs. On ibm_marrakesh and ibm_kingston the ordering was the same; the margin over uniform DD was small on marrakesh and large on the other two.</p></div>
+      <p class="note">Four coupled qubits start in |+⟩ and wait 20 µs (ideal ⟨X⟩ = 1). Single run on 22 Oct 2026, so ± is shot noise only, with no repeat-to-repeat error. Staggered DD led uniform DD by about 0.10 and led Qiskit PadDD and IBM Runtime DD by about 0.12.</p></div>
   </div>
   <div class="panel hcard rv" style="margin-top:24px"><h3>First run: GHZ-4 on ibm_marrakesh</h3>
     <div class="tw"><table><thead><tr><th>Configuration</th><th class="num">Fidelity</th><th class="num">± stderr</th><th>Job</th></tr></thead><tbody id="mtab"></tbody></table></div>
@@ -478,18 +478,19 @@ function legend(el,keys,on,cb){el.innerHTML='';keys.forEach(k=>{const b=document
   if(replay)requestAnimationFrame(()=>requestAnimationFrame(()=>host.querySelectorAll('.zero').forEach(r=>r.classList.remove('zero'))));}
  legend($('leg2'),['base','qk','uni','stag','auto'],on,()=>draw(true));draw(false);addEventListener('resize',()=>draw(false));onView(host,()=>draw(true));})();
 /* ---------- hardware ---------- */
-const HW={ibm_fez:{'No DD':-0.44,'Qiskit PadDD':0.64,'IBM Runtime DD':0.66,'Our DD uniform':0.76,'Our DD staggered':0.79},ibm_kingston:{'No DD':0.46,'Qiskit PadDD':0.81,'IBM Runtime DD':0.81,'Our DD uniform':0.83,'Our DD staggered':0.87}};
+const HW={ibm_fez:{'No DD':-0.049,'Qiskit PadDD':0.665,'IBM Runtime DD':0.632,'Our DD uniform':0.669,'Our DD staggered':0.779},ibm_kingston:{'No DD':0.276,'Qiskit PadDD':0.790,'IBM Runtime DD':0.802,'Our DD uniform':0.789,'Our DD staggered':0.824}};
+const HWE={ibm_fez:{'No DD':.0059,'Qiskit PadDD':.0047,'IBM Runtime DD':.0050,'Our DD uniform':.0048,'Our DD staggered':.0040},ibm_kingston:{'No DD':.0059,'Qiskit PadDD':.0039,'IBM Runtime DD':.0038,'Our DD uniform':.0039,'Our DD staggered':.0036}};
 const HCOL={'No DD':'var(--c-base)','Qiskit PadDD':'var(--c-qk)','IBM Runtime DD':'var(--c-qk)','Our DD uniform':'var(--c-uni)','Our DD staggered':'var(--c-stag)'};
-function hbars(host,data,lo,hi){host.innerHTML='';const pos=v=>(v-lo)/(hi-lo)*100;const fills=[];
+function hbars(host,data,lo,hi,errs){host.innerHTML='';const pos=v=>(v-lo)/(hi-lo)*100;const fills=[];
  Object.keys(data).forEach((k,i)=>{const v=data[k],row=document.createElement('div');row.className='hrow'+(k==='Our DD staggered'?' us':'');
   row.innerHTML='<div class="nm">'+k+'</div><div class="t"><div class="z" style="left:'+pos(0)+'%"></div><div class="f" style="background:'+HCOL[k]+';left:'+pos(0)+'%;width:0"></div></div><div class="v">'+v.toFixed(2)+'</div>';
   host.appendChild(row);fills.push([row.querySelector('.f'),v,i]);});
  const go=()=>fills.forEach(([f,v,i])=>setTimeout(()=>{const a=pos(Math.min(0,v)),b=pos(Math.max(0,v));f.style.left=a+'%';f.style.width=(b-a)+'%';},RM?0:60+i*110));return go;}
 (function(){const tabs=$('htabs');let cur='ibm_fez',go;
- function render(){[...tabs.children].forEach(b=>b.classList.toggle('on',b.textContent===cur));go=hbars($('hrows'),HW[cur],-.6,1);go();const s=HW[cur]['Our DD staggered']-HW[cur]['IBM Runtime DD'];$('hgain').textContent='staggered vs IBM DD: '+(s>=0?'+':'')+s.toFixed(2);}
+ function render(){[...tabs.children].forEach(b=>b.classList.toggle('on',b.textContent===cur));go=hbars($('hrows'),HW[cur],-.2,1,HWE[cur]);go();const s=HW[cur]['Our DD staggered']-HW[cur]['IBM Runtime DD'];$('hgain').textContent='staggered vs IBM DD: '+(s>=0?'+':'')+s.toFixed(3);}
  Object.keys(HW).forEach(k=>{const b=document.createElement('button');b.className='pill';b.textContent=k;b.onclick=()=>{cur=k;render();};tabs.appendChild(b);});
  render();onView($('hrows'),()=>render());
- const xg=hbars($('xrows'),{'No DD':0.03,'IBM Runtime DD':0.54,'Our DD uniform':0.67,'Our DD staggered':0.80},-.1,1);xg();onView($('xrows'),xg);})();
+ const xg=hbars($('xrows'),{'No DD':-0.125,'Qiskit PadDD':0.700,'IBM Runtime DD':0.702,'Our DD uniform':0.721,'Our DD staggered':0.818},-.2,1,{'No DD':.0091,'Qiskit PadDD':.0079,'IBM Runtime DD':.0079,'Our DD uniform':.0077,'Our DD staggered':.0064});xg();onView($('xrows'),xg);})();
 (function(){const rows=[['baseline',0.3846,0.0049,'dbcarq7i0auc73duicp0'],['IBM Runtime DD (XY4)',0.4694,0.0048,'dbcart9gv2cc73e9v2ug'],['our DD (idle-aware)',0.4794,0.0048,'dbcas0s24mrc73cj82rg'],['Runtime ZNE (level 2)',0.8028,0.0364,'dbcas41gv2cc73e9v38g'],['our DD + Runtime ZNE',0.7416,0.021,'dbcau79gv2cc73e9v6c0']];
  $('mtab').innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td class="num">'+r[1].toFixed(4)+'</td><td class="num">'+r[2].toFixed(4)+'</td><td><button class="jid" data-j="'+r[3]+'" title="Copy job ID">'+r[3]+'</button></td></tr>').join('');
  document.querySelectorAll('.jid').forEach(b=>b.onclick=()=>{const t=b.dataset.j;try{navigator.clipboard.writeText(t).then(()=>{b.textContent='copied';setTimeout(()=>b.textContent=t,1200);},()=>{});}catch(e){}});})();
