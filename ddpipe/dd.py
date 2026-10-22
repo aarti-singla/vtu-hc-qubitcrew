@@ -108,7 +108,7 @@ def _feasible(fr, L, tp):
 def inject_dd(prog: TimedProgram, edges, tp_ns: float, strategy: str = "staggered",
               family: str = "XY4", tau_ns: float = 600.0, min_window_ns: float = 250.0,
               zz_rates: dict | None = None, pulse_cost: float = 3e-4,
-              max_pulses: int = 16) -> tuple[TimedProgram, DDInfo]:
+              max_pulses: int = 16, xtalk_tau_scale: float = 1.0) -> tuple[TimedProgram, DDInfo]:
     """Return a copy of ``prog`` with DD pulses inserted into idle windows.
 
     tau_ns     : target spacing between pulses.  Surveys of DD on IBM hardware find
@@ -116,6 +116,8 @@ def inject_dd(prog: TimedProgram, edges, tp_ns: float, strategy: str = "staggere
                  a tunable that the benchmark sweeps.
     zz_rates   : optional {edge: rad/ns}; unknown -> a typical 70 kHz on every edge.
     pulse_cost : infidelity charged per DD pulse in the staggering cost function.
+    xtalk_tau_scale : multiplies ``tau_ns`` in crosstalk-idle windows (a neighbour is running a two-qubit
+                 gate), so those windows can get denser (<1) or sparser (>1) DD than idle-idle ones.  1.0 = off.
     """
     info = DDInfo(strategy, family)
     out = prog.copy()
@@ -136,7 +138,8 @@ def inject_dd(prog: TimedProgram, edges, tp_ns: float, strategy: str = "staggere
 
     def n_nominal(w):
         cap = min(max_pulses, int(w.L // (2 * tp_ns)))
-        n = 2 * max(1, round(w.L / tau_ns / 2.0))
+        tau = tau_ns * (xtalk_tau_scale if w.kind == "crosstalk-idle" else 1.0)
+        n = 2 * max(1, round(w.L / tau / 2.0))
         return max(2, min(n, cap - cap % 2)), cap
 
     gate_times: dict[int, list] = {}

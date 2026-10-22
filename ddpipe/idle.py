@@ -62,12 +62,24 @@ def idle_windows(prog: TimedProgram, edges, min_len: float = 0.0) -> list[Window
             if s - cursor > max(EPS, min_len):
                 wins.append(Window(q, cursor, s))
             cursor = max(cursor, e_end)
-    # classify
+    # classify: busy time = length of the union of neighbours' two-qubit-gate intervals inside the window
     for w in wins:
-        busy = 0.0
+        spans = []
         for nq in nb.get(w.q, ()):
             for (a, b) in cx_by_q.get(nq, ()):
-                busy = max(busy, max(0.0, min(w.t1, b) - max(w.t0, a)))
+                lo, hi = max(w.t0, a), min(w.t1, b)
+                if hi > lo:
+                    spans.append((lo, hi))
+        busy, cur_lo, cur_hi = 0.0, None, None
+        for lo, hi in sorted(spans):
+            if cur_hi is None or lo > cur_hi:
+                if cur_hi is not None:
+                    busy += cur_hi - cur_lo
+                cur_lo, cur_hi = lo, hi
+            else:
+                cur_hi = max(cur_hi, hi)
+        if cur_hi is not None:
+            busy += cur_hi - cur_lo
         w.busy_frac = busy / w.L if w.L > 0 else 0.0
         w.kind = "crosstalk-idle" if w.busy_frac > 0.05 else "idle-idle"
     return wins

@@ -49,12 +49,13 @@ class IdleAwareDD(TransformationPass):
     """Insert crosstalk-aware dynamical decoupling into the idle windows of a scheduled circuit."""
 
     def __init__(self, target: Target, strategy: str = "staggered", family: str = "XY4", tau_ns: float = 600.0,
-                 min_window_ns: float = 250.0, zz_rates: dict | None = None, max_pulses: int = 16):
+                 min_window_ns: float = 250.0, zz_rates: dict | None = None, max_pulses: int = 16, xtalk_tau_scale: float = 1.0):
         super().__init__()
         if strategy not in ("uniform", "staggered"):
             raise ValueError("strategy must be 'uniform' or 'staggered'")
         self.target, self.strategy, self.family = target, strategy, family
         self.tau_ns, self.min_window_ns, self.zz_rates, self.max_pulses = tau_ns, min_window_ns, zz_rates, max_pulses
+        self.xtalk_tau_scale = xtalk_tau_scale
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         circ = dag_to_circuit(dag)
@@ -71,7 +72,8 @@ class IdleAwareDD(TransformationPass):
         prog = program_from_circuit(body, self.target, "IdleAwareDD")
         tp_ns, p1q = _x_pulse(self.target)
         out, info = inject_dd(prog, _edges(self.target), tp_ns, self.strategy, self.family, self.tau_ns,
-                              self.min_window_ns, zz_rates=self.zz_rates, pulse_cost=p1q, max_pulses=self.max_pulses)
+                              self.min_window_ns, zz_rates=self.zz_rates, pulse_cost=p1q, max_pulses=self.max_pulses,
+                              xtalk_tau_scale=self.xtalk_tau_scale)
         granularity = int(getattr(self.target, "granularity", 1) or 1)
         new = qiskit_circuit_from_program(out, granularity=granularity)
         final = circ.copy_empty_like()
