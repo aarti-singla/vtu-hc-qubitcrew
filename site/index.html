@@ -159,10 +159,6 @@ td.num{font-family:var(--f-mono);text-align:right}th.num{text-align:right}
 .mem:hover{transform:translateY(-4px);border-color:var(--accent)}
 .av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 1.1rem var(--f-disp);background:var(--surface2);color:var(--accent);margin-bottom:14px}
 .mem b{display:block;font-size:1.05rem}.mem span{color:var(--muted);font-size:.88rem}.mem .gh{font-family:var(--f-mono);font-size:.8rem;display:block;margin-top:8px;color:var(--accent)}
-.run{margin-top:30px;position:relative}
-.run pre{margin:0;padding:20px 22px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow-x:auto;line-height:1.7;color:var(--fg)}
-.run .pill{position:absolute;top:12px;right:12px}
-.run .cm{color:var(--muted)}
 footer{border-top:1px solid var(--line);padding-block:36px;color:var(--muted);font-size:.85rem}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv,.bar-r,.ln,.hrow .f{transition:none}}
@@ -291,7 +287,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <li>That the staggering gain is general. Over our own uniform DD it was +0.03 to +0.04 on hardware.</li>
       <li>That fidelity of the busy qubits improves. CZ errors dominate them.</li>
       <li>That simulated ZNE values above 1 are physical.</li>
-      <li>Anything across devices. Each result is one session per device and baselines drift between sessions.</li></ul></div>
+      <li>Anything across devices. Each device was measured in its own session (3 interleaved repeats for the spectator test, one run for the crosstalk test), and baselines drift between sessions.</li></ul></div>
   </div>
 </div></section>
 
@@ -304,15 +300,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <a class="mem rv" href="https://github.com/aarti-singla" target="_blank" rel="noopener"><div class="av">A</div><b>Aarti Singla</b><span>Developer</span><i class="gh">@aarti-singla</i></a>
     <a class="mem rv" href="https://github.com/angelgarg" target="_blank" rel="noopener"><div class="av">A</div><b>Angel Garg</b><span>Developer</span><i class="gh">@angelgarg</i></a>
   </div>
-  <div class="run rv"><button class="pill" id="copy">Copy</button><pre id="runpre"><span class="cm"># run it yourself</span>
-git clone https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-qubitcrew
-cd vtu-hc-qubitcrew
-pip install -r requirements.txt
-python -m pytest -q                    <span class="cm"># 33 passed</span>
-python -m streamlit run app/app.py     <span class="cm"># live benchmark</span></pre></div>
 </div></section>
 </main>
-<footer><div class="wrap"><span>QubitCrew · VTU × IBM Quantum Qiskit Fall Fest 2026</span><span>Gains are from one hardware session per device and a noise model, see Scope.</span></div></footer>
+<footer><div class="wrap"><span>QubitCrew · VTU × IBM Quantum Qiskit Fall Fest 2026</span><span>Gains come from hardware sessions on two devices and a noise model, see Scope.</span></div></footer>
 <div class="tip" id="tip"></div>
 
 <script>
@@ -499,7 +489,6 @@ function hbars(host,data,lo,hi,errs){host.innerHTML='';const pos=v=>(v-lo)/(hi-l
  function set(xv){const r=b.getBoundingClientRect(),f=Math.max(0,Math.min(1,(xv-r.left)/r.width));t.style.clipPath='inset(0 '+((1-f)*100)+'% 0 0)';h.style.left=f*100+'%';}
  b.addEventListener('pointerdown',e=>{auto=false;drag=true;b.setPointerCapture(e.pointerId);set(e.clientX);});b.addEventListener('pointermove',e=>{if(drag)set(e.clientX)});b.addEventListener('pointerup',()=>drag=false);
  (function tick(){if(auto){a+=.012;const r=b.getBoundingClientRect();set(r.left+r.width*(.5+.38*Math.sin(a)));requestAnimationFrame(tick);}})();})();
-$('copy').onclick=()=>{const t=$('runpre').innerText;try{navigator.clipboard.writeText(t).then(()=>{$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy',1400);},()=>{});}catch(e){}};
 </script>
 
 </body></html>
