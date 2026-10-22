@@ -63,7 +63,7 @@ def mean_x(idx):
     return SparsePauliOp.from_sparse_list([("X", [i], 1.0 / len(idx)) for i in idx], num_qubits=N)
 
 
-def build(backend, layout, strategy, tau_ns, granularity, pairs, max_pulses):
+def build(backend, layout, strategy, tau_ns, granularity, pairs, max_pulses, xtalk_tau_scale=1.0):
     pm = generate_preset_pass_manager(optimization_level=0, backend=backend, seed_transpiler=7,
                                       initial_layout=layout)
     isa = pm.run(spectator_circuit(pairs))
@@ -72,7 +72,8 @@ def build(backend, layout, strategy, tau_ns, granularity, pairs, max_pulses):
     edges = sorted({tuple(sorted(e)) for e in backend.coupling_map.get_edges()})
     used = sorted({q for e in prog.events for q in e.qubits})
     tp = float(np.mean([target["x"][(q,)].duration for q in used])) * 1e9
-    dd_prog, info = inject_dd(prog, edges, tp, strategy, "XpXm", tau_ns, 250.0, max_pulses=max_pulses)
+    dd_prog, info = inject_dd(prog, edges, tp, strategy, "XpXm", tau_ns, 250.0, max_pulses=max_pulses,
+                              xtalk_tau_scale=xtalk_tau_scale)
     ours = qiskit_circuit_from_program(dd_prog, granularity=granularity)
     return isa, ours, idle_report(prog, edges), info, prog
 
@@ -88,6 +89,10 @@ def main():
     ap.add_argument("--granularity", type=int, default=0)
     ap.add_argument("--max-pulses", type=int, default=16)
     ap.add_argument("--repeats", type=int, default=1)
+    ap.add_argument("--xtalk-tau-scale", type=float, default=1.0,
+                    help="scale tau in crosstalk-idle windows only (our DD configs); 1.0 = off")
+    ap.add_argument("--configs", default=None,
+                    help="comma-separated subset of configs to run, e.g. 'baseline,our DD uniform,our DD staggered'")
     ap.add_argument("--out", default="results/spectator_hw.json")
     a = ap.parse_args()
 
@@ -108,7 +113,7 @@ def main():
     layout = [int(q) for q in a.layout.split(",")] if a.layout else find_path(backend, N)
     gran = a.granularity or max(16, int(getattr(backend.target, "granularity", 0) or 0))
     print(f"backend={name}  layout={layout}  pairs={a.pairs}  dt={backend.target.dt * 1e9:.3f} ns  granularity={gran} dt")
-    built = {s: build(backend, layout, s, a.tau, gran, a.pairs, a.max_pulses) for s in ("uniform", "staggered")}
+    built = {s: build(backend, layout, s, a.tau, gran, a.pairs, a.max_pulses, a.xtalk_tau_scale) for s in ("uniform", "staggered")}
     isa, _, rep, _, prog = built["uniform"]
     for s, b in built.items():
         print(f"  {s:10s} DD pulses={b[3].n_pulses}")
@@ -133,6 +138,9 @@ def main():
             ("our DD staggered", built["staggered"][1], off)]
     if a.fake:
         jobs = [j for j in jobs if j[0] != "IBM Runtime DD"]
+    if a.configs:
+        keep = {c.strip() for c in a.configs.split(",")}
+        jobs = [j for j in jobs if j[0] in keep]
 
     rows = []
 
@@ -182,7 +190,7 @@ def main():
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps({"backend": name, "date": time.strftime("%Y-%m-%d %H:%M"), "layout": layout,
                                "pairs": a.pairs, "circuit_us": prog.t_end / 1000, "shots": a.shots, "tau_ns": a.tau,
-                               "max_pulses": a.max_pulses, "repeats": a.repeats, "window_kinds": kinds,
+                               "max_pulses": a.max_pulses, "xtalk_tau_scale": a.xtalk_tau_scale, "repeats": a.repeats, "window_kinds": kinds,
                                "pulses": {s: built[s][3].n_pulses for s in built},
                                "rows": rows, "summary": summary}, indent=1))
     print("saved", out)

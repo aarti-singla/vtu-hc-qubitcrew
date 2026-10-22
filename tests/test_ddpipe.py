@@ -171,3 +171,33 @@ def test_pass_keeps_final_measurements_and_rejects_mid_circuit_ones():
     bad.sx(0); bad.measure(0, 0); bad.sx(0)
     with pytest.raises(TranspilerError):
         PassManager([IdleAwareDD(target=comp.target)]).run(bad)
+
+
+def test_crosstalk_idle_accumulates_over_many_gates():
+    """A neighbour running a long train of CZ gates makes the whole window crosstalk-idle."""
+    from ddpipe.idle import idle_windows
+    from ddpipe.program import Event, TimedProgram
+    ev = []
+    for k in range(40):
+        ev.append(Event(t=36.0 + 68.0 * k, dur=68.0, name="cz", qubits=(1, 2), param=0.0, tag="circuit", order=k))
+    ev.append(Event(t=0.0, dur=36.0, name="sx", qubits=(0,), param=0.0, tag="circuit", order=100))
+    ev.append(Event(t=0.0, dur=36.0, name="sx", qubits=(1,), param=0.0, tag="circuit", order=101))
+    prog = TimedProgram(n=3, events=ev, t_end=36.0 + 68.0 * 40)
+    wins = [w for w in idle_windows(prog, [(0, 1), (1, 2)]) if w.q == 0]
+    assert wins and wins[0].kind == "crosstalk-idle" and wins[0].busy_frac > 0.9
+
+
+def test_xtalk_tau_scale_only_changes_crosstalk_idle_windows():
+    from ddpipe.dd import inject_dd
+    from ddpipe.program import Event, TimedProgram
+    ev = [Event(t=0.0, dur=36.0, name="sx", qubits=(0,), param=0.0, tag="circuit", order=0),
+          Event(t=0.0, dur=36.0, name="sx", qubits=(1,), param=0.0, tag="circuit", order=1)]
+    ev += [Event(t=36.0 + 300.0 * k, dur=300.0, name="cx", qubits=(1, 2), param=0.0, tag="circuit", order=10 + k)
+           for k in range(20)]
+    prog = TimedProgram(n=3, events=ev, t_end=36.0 + 300.0 * 20)
+    edges = [(0, 1), (1, 2)]
+    base, i0 = inject_dd(prog, edges, 35.6, "uniform", "XpXm", 600.0, 250.0, max_pulses=64)
+    same, i1 = inject_dd(prog, edges, 35.6, "uniform", "XpXm", 600.0, 250.0, max_pulses=64, xtalk_tau_scale=1.0)
+    dense, i2 = inject_dd(prog, edges, 35.6, "uniform", "XpXm", 600.0, 250.0, max_pulses=64, xtalk_tau_scale=0.5)
+    assert i0.n_pulses == i1.n_pulses
+    assert i2.n_pulses > i0.n_pulses
