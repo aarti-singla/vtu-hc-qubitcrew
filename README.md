@@ -46,9 +46,8 @@
 
 | # | Name | GitHub Username | Role |
 | :-- | :--- | :--- | :--- |
-| 1 | Prisha Bharti | [@prishabharti](https://github.com/prishabharti) | Team Lead |
+| 1 | Angel Garg | [@angelgarg](https://github.com/angelgarg) | Team Lead |
 | 2 | Aarti Singla | [@aarti-singla](https://github.com/aarti-singla) | Developer |
-| 3 | Angel Garg | [@angelgarg](https://github.com/angelgarg) | Developer |
 
 ---
 
@@ -90,6 +89,22 @@ flowchart LR
 5. **Output** — state fidelity / energy error per configuration, schedule timelines, and the Streamlit dashboard
 
 ---
+
+### Drop-in Qiskit transpiler pass
+
+The pipeline is also packaged as a standard `TransformationPass`, so it slots into any `PassManager`:
+
+```python
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDelay
+from ddpipe import IdleAwareDD
+
+pm = PassManager([ALAPScheduleAnalysis(target=target), PadDelay(target=target),
+                  IdleAwareDD(target=target, strategy="staggered")])
+dd_circuit = pm.run(transpiled_circuit)
+```
+
+It classifies each idle window (idle-idle vs crosstalk-idle), staggers DD phases across coupled idle qubits, keeps the circuit unitary unchanged, and leaves final measurements in place (mid-circuit measurements are rejected). Covered by `tests/test_ddpipe.py`.
 
 ## 🛠️ Tech Stack
 

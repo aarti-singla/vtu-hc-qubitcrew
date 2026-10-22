@@ -123,3 +123,51 @@ def test_program_uses_backend_dt_not_a_constant():
     back = qiskit_circuit_from_program(prog, granularity=16)
     delays = [i.operation.duration for i in back.data if i.operation.name == "delay"]
     assert abs(sum(delays) * 4 - 10000) <= 16 * 4                  # round-trips to ~10 us
+
+
+# ---- the transpiler pass -------------------------------------------------------------------------
+def _scheduled_pm(target, **kw):
+    from qiskit.transpiler import PassManager
+    from qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDelay
+    from ddpipe import IdleAwareDD
+    return PassManager([ALAPScheduleAnalysis(target=target), PadDelay(target=target), IdleAwareDD(target=target, **kw)])
+
+
+@pytest.mark.parametrize("strategy", ["uniform", "staggered"])
+def test_pass_inserts_pulses_and_keeps_the_unitary(strategy):
+    dev = Device(4)
+    comp = Compiled(build("ghzwait", 4), dev)
+    out = _scheduled_pm(comp.target, strategy=strategy, tau_ns=600.0).run(comp.basis)
+    n_x = lambda c: sum(i.operation.name == "x" for i in c.data)
+    assert n_x(out) > n_x(comp.basis)                                   # pulses were added
+    ref, got = Statevector(comp.basis).data, Statevector(out).data
+    assert abs(np.vdot(ref, got)) == pytest.approx(1.0, abs=1e-9)       # DD trains compose to the identity
+
+
+def test_pass_matches_the_pipeline_pulse_count():
+    dev = Device(4)
+    comp = Compiled(build("ghzwait", 4), dev)
+    out = _scheduled_pm(comp.target, strategy="staggered", tau_ns=600.0).run(comp.basis)
+    prog, _ = comp.program(1.0, Config("s", dd="staggered", tau_ns=600.0))
+    n_x = lambda c: sum(i.operation.name == "x" for i in c.data)
+    assert n_x(out) - n_x(comp.basis) == prog.n_dd_pulses
+
+
+def test_pass_keeps_final_measurements_and_rejects_mid_circuit_ones():
+    from qiskit.transpiler.exceptions import TranspilerError
+    dev = Device(4)
+    comp = Compiled(build("ghzwait", 4), dev)
+    from qiskit.transpiler import PassManager
+    from qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDelay
+    from ddpipe import IdleAwareDD
+    sched = PassManager([ALAPScheduleAnalysis(target=comp.target), PadDelay(target=comp.target)]).run(comp.basis)
+    circ = sched.copy()
+    circ.measure_all()
+    out = PassManager([IdleAwareDD(target=comp.target)]).run(circ)
+    assert sum(i.operation.name == "measure" for i in out.data) == 4 and out.num_clbits == 4
+    bad = sched.copy_empty_like()
+    from qiskit.circuit import ClassicalRegister
+    bad.add_register(ClassicalRegister(1, "c"))
+    bad.sx(0); bad.measure(0, 0); bad.sx(0)
+    with pytest.raises(TranspilerError):
+        PassManager([IdleAwareDD(target=comp.target)]).run(bad)
