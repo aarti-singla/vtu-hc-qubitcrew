@@ -351,7 +351,7 @@ _ab_path = RES / "ablation.csv"
 if _ab_path.exists():
     ab0 = pd.read_csv(_ab_path)
 
-tabs = st.tabs(["Project site", "Schedule explorer", "Live benchmark", "Results", "Hardware"])
+tabs = st.tabs(["Project site", "Schedule explorer", "Live benchmark", "Evidence"])
 
 # ------------------------------------------------------------ Project site
 with tabs[0]:
@@ -421,6 +421,9 @@ with tabs[2]:
 
 # ------------------------------------------------------------------ Results
 with tabs[3]:
+    st.markdown("## Simulation")
+    st.caption("Noise model built from device-like parameters. The same experiments are summarised on the Project site; "
+               "this tab has the full tables and sweeps.")
     ab, sc, ta, nz, sh = (load(x) for x in ("ablation", "scaling", "tau_sweep", "noise_sweep", "shots"))
     if ab is None:
         st.warning("Run `python -m ddpipe.experiments` first to generate results/.")
@@ -473,13 +476,18 @@ with tabs[3]:
                        "(or reverse) at low shot counts.")
 
 # ------------------------------------------------------------------ Hardware
-with tabs[4]:
+with tabs[3]:
+    st.divider()
+    st.markdown("## Real hardware (IBM Heron)")
+    st.caption("Every number below comes from a job on a real device. Error bars are shot noise only.")
     hw = RES / "hardware.json"
     if hw.exists():
         data = json.loads(hw.read_text())
-        st.success(f"Backend: {data.get('backend')} · date: {data.get('date')}")
+        st.markdown(f"#### GHZ-4 on {data.get('backend')}")
         st.dataframe(pd.DataFrame(data["rows"]), width="stretch", hide_index=True)
-        st.caption("Job IDs: " + ", ".join(data.get("job_ids", [])))
+        with st.expander("Verify on IBM Quantum: job IDs"):
+            st.caption(f"{data.get('backend')} · {data.get('date')}")
+            st.code("\n".join(data.get("job_ids", [])), language=None)
     else:
         st.info("No hardware run recorded yet. Run `python scripts/run_hardware.py` with your IBM Quantum credentials; "
                 "it writes `results/hardware.json`, which this tab then displays (with job IDs).")
@@ -521,7 +529,13 @@ with tabs[4]:
                     continue
                 out.append({"run": label(d), "config": s["config"], "mean <X>": s[value_key],
                             "stderr": s.get(err_key) or 0.0, "runs": s.get("runs", 1)})
-        return pd.DataFrame(out)
+        df = pd.DataFrame(out)
+        if df.empty:
+            return df
+        # several files can describe the same device and setup (an early run plus a later repeated one):
+        # keep the one with the most repeats, so every (run, config) pair appears once
+        df = df.sort_values("runs", kind="stable")
+        return df.drop_duplicates(["run", "config"], keep="last").reset_index(drop=True)
 
     xt = _summaries(sorted(list(RES.glob("xt_*.json")) + list(RES.glob("crosstalk_hw*.json"))),
                     lambda d: f"{d.get('backend')} · {d.get('wait_ns', 0) / 1000:g} µs wait", "x_mean", "stderr")
@@ -545,5 +559,5 @@ with tabs[4]:
                    "classified idle-idle, and the busy pair's own value is dominated by CZ errors, so it is not shown.")
         pv = sp.pivot(index="run", columns="config", values="mean <X>")
         table(pv[[c for c in HW_ORDER if c in pv.columns]])
-    st.markdown("**Configurations compared on hardware:** no suppression · Runtime DD · our schedule-aware DD "
-                "(exported circuit, Runtime DD off) · Runtime ZNE · our DD + Runtime ZNE/TREX.")
+    st.caption("Compared on hardware: no suppression · IBM Runtime DD · Qiskit PadDD · our uniform and staggered DD · "
+               "Runtime ZNE · our DD + Runtime ZNE.")
