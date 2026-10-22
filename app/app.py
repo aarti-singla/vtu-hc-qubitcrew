@@ -416,7 +416,8 @@ with tabs[2]:
                ("Reduction", f"{(1 - _best['|1-F|'] / _base) * 100:.0f}%" if _base > 0 else "n/a", "vs baseline, same circuit and noise", True)])
         st.markdown("**State-fidelity error |1 − F|, lower is better**")
         bars(df.assign(c=""), "c", "config", "|1-F|", ser_order=[c for c in ORDER if c in set(df.config)] , ytitle="|1 − F|", height=340)
-        st.dataframe(df.round(4), width="stretch", hide_index=True)
+        st.dataframe(df.drop(columns=["energy error"]) if df["energy error"].isna().all() else df.round(4),
+                     width="stretch", hide_index=True)
         st.caption("ZNE rows are extrapolated estimates and may fall slightly outside [0, 1].")
 
 # ------------------------------------------------------------------ Results
@@ -484,7 +485,7 @@ with tabs[3]:
     if hw.exists():
         data = json.loads(hw.read_text())
         st.markdown(f"#### GHZ-4 on {data.get('backend')}")
-        st.dataframe(pd.DataFrame(data["rows"]), width="stretch", hide_index=True)
+        st.dataframe(pd.DataFrame(data["rows"]).drop(columns=["job_id"], errors="ignore"), width="stretch", hide_index=True)
         with st.expander("Verify on IBM Quantum: job IDs"):
             st.caption(f"{data.get('backend')} · {data.get('date')}")
             st.code("\n".join(data.get("job_ids", [])), language=None)
